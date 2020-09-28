@@ -6,6 +6,7 @@ use Dompdf\Css\Style;
 use Dompdf\Css\Stylesheet;
 use Dompdf\Dompdf;
 use Dompdf\FontMetrics;
+use Dompdf\Frame;
 use Dompdf\FrameDecorator\Block;
 use Dompdf\FrameDecorator\Page;
 use Dompdf\Tests\TestCase;
@@ -42,5 +43,46 @@ class BlockTest extends TestCase
         $barExpected = [170.00787401574803, 72.876548031496057, 'x' => 170.00787401574803, 'y' => 72.876548031496057];
         $barActual = $bar->get_position();
         $this->assertEquals($barExpected, $barActual);
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @throws \Dompdf\Exception
+     * @throws \Exception
+     */
+    public function testCharacteriseMultilevelDivOverprinting()
+    {
+        $html = file_get_contents(__DIR__ .'/overlap-2.html');
+
+        $pdf = new Dompdf();
+        $pdf->loadHtml($html);
+
+        $pdf->render();
+
+        $tree = $pdf->getTree();
+        $reflec = new \ReflectionClass($tree);
+        $prop = $reflec->getProperty('_registry');
+        $prop->setAccessible(true);
+
+        $res = $prop->getValue($tree);
+
+        // initially, dig out "Foo" and "Baz" frames, then go from there
+        $frames = [];
+        $expected = ['Foo', 'Baz'];
+
+        foreach ($res as $line) {
+            $content = $line->get_node()->textContent;
+
+            if (in_array($content, $expected)) {
+                $frames[$content] = $line;
+            }
+        }
+
+        // Ids of frames in question are 21 and 54
+        /** @var Frame $fooBlock */
+        $fooBlock = $frames['Foo']->get_position();
+        $bazBlock = $frames['Baz']->get_position();
+
+        $this->assertGreaterThan($fooBlock['y'], $bazBlock['y'], 'Foo block must be higher on page than Baz block');
     }
 }
