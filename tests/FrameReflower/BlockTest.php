@@ -14,10 +14,14 @@ use Mockery;
 class BlockTest extends TestCase
 {
     /**
+     * Characterise some weirdness in the block reflower when divs were being printed over the top of each other,
+     * rather than alongside each other
+     *
+     * @runInSeparateProcess
      * @throws \Dompdf\Exception
      * @throws \Exception
      */
-    public function testHandleBoxSizing()
+    public function testCharacteriseDivOverprinting()
     {
         $html = file_get_contents(__DIR__ .'/header-strip.html');
 
@@ -27,9 +31,16 @@ class BlockTest extends TestCase
         $pdf->render();
 
         $foo = $pdf->getTree()->get_frame(8);
+        $this->assertNotNull($foo);
         $bar = $pdf->getTree()->get_frame(11);
+        $this->assertNotNull($bar);
 
-        $this->assertEquals($foo->get_position('y'), $bar->get_position('y') , 'Foo and bar are not on the same line and should be.');
-        $this->assertNotEquals($foo->get_position('x'), $bar->get_position('x') , 'Foo and bar start at the same position, and shouldn\'t.');
+        $fooExpected = [34.015748031496059, 72.876548031496057, 'x' => 34.015748031496059, 'y' => 72.876548031496057];
+        $fooActual = $foo->get_position();
+        $this->assertEquals($fooExpected, $fooActual);
+
+        $barExpected = [170.00787401574803, 72.876548031496057, 'x' => 170.00787401574803, 'y' => 72.876548031496057];
+        $barActual = $bar->get_position();
+        $this->assertEquals($barExpected, $barActual);
     }
 }

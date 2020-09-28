@@ -767,7 +767,6 @@ class Block extends AbstractFrameReflower
      */
     function reflow(BlockFrameDecorator $block = null)
     {
-
         // Check if a page break is forced
         $page = $this->_frame->get_root();
         $page->check_forced_page_break($this->_frame);
@@ -830,9 +829,9 @@ class Block extends AbstractFrameReflower
         $line_box->y = $cb_y;
         $line_box->get_float_offsets();
 
+        $cursors = [];
         // Set the containing blocks and reflow each child
         foreach ($this->_frame->get_children() as $child) {
-
             // Bail out if the page is full
             if ($page->is_full()) {
                 break;
@@ -848,8 +847,17 @@ class Block extends AbstractFrameReflower
             if ($page->check_page_break($child)) {
                 break;
             }
+            $vert = intval($child->get_position('y') * 100);
+            if (!array_key_exists($vert, $cursors)) {
+                $cursors[$vert] = 0;
+            }
+            $cursor = $cursors[$vert];
 
-            $this->process_float($child, $cb_x, $w);
+            $kidWidth = floatval($child->get_content_box()['w']);
+
+            $this->process_float($child, $cb_x + $cursor, $w);
+
+            $cursors[$vert] += $kidWidth;
         }
 
         // Determine our height
