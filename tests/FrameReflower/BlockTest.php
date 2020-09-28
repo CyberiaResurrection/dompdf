@@ -2,7 +2,12 @@
 
 namespace Dompdf\Tests\FrameReflower;
 
+use Dompdf\Css\Style;
+use Dompdf\Css\Stylesheet;
 use Dompdf\Dompdf;
+use Dompdf\FontMetrics;
+use Dompdf\FrameDecorator\Block;
+use Dompdf\FrameDecorator\Page;
 use Dompdf\Tests\TestCase;
 use Mockery;
 
