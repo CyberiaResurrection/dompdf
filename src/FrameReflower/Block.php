@@ -708,10 +708,11 @@ class Block extends AbstractFrameReflower
      * @param Frame $child
      * @param float $cb_x
      * @param float $cb_w
+     * @param bool $overflow
      * @param int $cursor
      * @throws Exception
      */
-    function process_float(Frame $child, $cb_x, $cb_w, $cursor = 0)
+    function process_float(Frame $child, $cb_x, $cb_w, $cursor = 0, &$overflow = false)
     {
         $child_style = $child->get_style();
         $root = $this->_frame->get_root();
@@ -749,6 +750,10 @@ class Block extends AbstractFrameReflower
             }
 
             if ($cb_w < $float_x + $float_w - $old_x) {
+                $height = $child->get_content_box()['h'];
+                $float_y += $height;
+                $float_x = $cb_x;
+                $overflow = true;
                 // TODO handle when floating elements don't fit
             }
 
@@ -835,6 +840,7 @@ class Block extends AbstractFrameReflower
         $cursors = [];
         // Set the containing blocks and reflow each child
         foreach ($this->_frame->get_children() as $child) {
+
             // Bail out if the page is full
             if ($page->is_full()) {
                 break;
@@ -857,8 +863,15 @@ class Block extends AbstractFrameReflower
             $cursor = $cursors[$vert];
 
             $kidWidth = floatval($child->get_content_box()['w']);
+            $overflow = false;
 
-            $this->process_float($child, $cb_x, $w, $cursor);
+            $this->process_float($child, $cb_x, $w, $cursor, $overflow);
+            if ($overflow) {
+                $vert = intval($child->get_position('y') * 100);
+                if (!array_key_exists($vert, $cursors)) {
+                    $cursors[$vert] = 0;
+                }
+            }
 
             $cursors[$vert] += $kidWidth;
         }
