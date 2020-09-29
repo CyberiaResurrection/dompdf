@@ -124,21 +124,34 @@ class BlockTest extends TestCase
 
         // initially, dig out "Foo" and "Baz" frames, then go from there
         $frames = [];
-        $expected = ['Foo', 'Baz'];
+        $expected = ['Foo', 'Baz', 'Bar', 'Breakdance'];
 
+        $ids = [];
         foreach ($res as $line) {
             $content = $line->get_node()->textContent;
 
             if (in_array($content, $expected)) {
-                $frames[$content] = $line->get_parent()->get_parent();
+                $frames[$content] = $line->get_parent();
+                $ids[] = $frames[$content]->get_id();
             }
         }
 
-        // Ids of frames in question are 18 and 51
+        // Ids of frames in question are parents of 21, 36, 54 and 69
+        // Namely, 20, 35, 53 and 68, respectively.
         /** @var Frame $fooBlock */
         $fooBlock = $frames['Foo']->get_position();
         $bazBlock = $frames['Baz']->get_position();
+        $barBlock = $frames['Bar']->get_position();
+        $breakBlock = $frames['Breakdance']->get_position();
 
-        $this->assertGreaterThan($fooBlock['y'], $bazBlock['y'], 'Foo block must be higher on page than Baz block');
+        // all blocks should have same X position
+        $this->assertEquals($fooBlock['x'], $bazBlock['x']);
+        $this->assertEquals($fooBlock['x'], $barBlock['x']);
+        $this->assertEquals($fooBlock['x'], $breakBlock['x']);
+
+        $this->assertGreaterThan($fooBlock['y'], $barBlock['y'], 'Foo block must be higher on page than Bar block');
+        $this->assertLessThan($barBlock['y'], $bazBlock['y'], 'Bar block must be higher on page than Baz block');
+        $this->assertLessThan($fooBlock['y'], $bazBlock['y'], 'Foo block must be higher on page than Baz block');
+        $this->assertGreaterThan($bazBlock['y'], $breakBlock['y'], 'Baz block must be higher on page than Break block');
     }
 }
