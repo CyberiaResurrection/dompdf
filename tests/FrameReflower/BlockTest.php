@@ -46,7 +46,22 @@ class BlockTest extends TestCase
     }
 
     /**
-     * @runInSeparateProcess
+     * @throws \Dompdf\Exception
+     */
+    public function testCharacteriseVerticalDivOverprinting()
+    {
+        $html = file_get_contents(__DIR__ .'/overlap-simple.html');
+
+        $pdf = new Dompdf();
+        $pdf->loadHtml($html);
+
+        $pdf->render();
+
+        $output = $pdf->output();
+        file_put_contents('test.pdf', $output);
+    }
+
+    /**
      * @throws \Dompdf\Exception
      * @throws \Exception
      */
@@ -58,6 +73,9 @@ class BlockTest extends TestCase
         $pdf->loadHtml($html);
 
         $pdf->render();
+
+        $output = $pdf->output();
+        file_put_contents('test.pdf', $output);
 
         $tree = $pdf->getTree();
         $reflec = new \ReflectionClass($tree);
@@ -74,11 +92,11 @@ class BlockTest extends TestCase
             $content = $line->get_node()->textContent;
 
             if (in_array($content, $expected)) {
-                $frames[$content] = $line;
+                $frames[$content] = $line->get_parent()->get_parent();
             }
         }
 
-        // Ids of frames in question are 21 and 54
+        // Ids of frames in question are 18 and 51
         /** @var Frame $fooBlock */
         $fooBlock = $frames['Foo']->get_position();
         $bazBlock = $frames['Baz']->get_position();
