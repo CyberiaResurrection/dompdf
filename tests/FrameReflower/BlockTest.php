@@ -46,6 +46,7 @@ class BlockTest extends TestCase
     }
 
     /**
+     * @runInSeparateProcess
      * @throws \Dompdf\Exception
      */
     public function testCharacteriseVerticalDivOverprinting()

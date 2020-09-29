@@ -738,7 +738,9 @@ class Block extends AbstractFrameReflower
             if ($child_style->clear === "none") {
                 switch ($child_style->float) {
                     case "left":
-                        $float_x_offset = $line_box->left;
+                        if (0 == $cursor) {
+                            $float_x_offset = $line_box->left;
+                        }
                         break;
                     case "right":
                         $float_x_offset = ($cb_w - $line_box->right - $float_w);
@@ -752,7 +754,6 @@ class Block extends AbstractFrameReflower
             $float_x += $float_x_offset;
 
             if ($cb_w < $float_x + $float_w - $old_x) {
-                $cursor = 0;
                 $height = $child->get_content_box()['h'];
                 $float_y += $height;
                 $float_x = $cb_x;
@@ -839,7 +840,6 @@ class Block extends AbstractFrameReflower
         $line_box = $this->_frame->get_current_line_box();
         $line_box->y = $cb_y;
         $line_box->get_float_offsets();
-
         $cursors = [];
         // Set the containing blocks and reflow each child
         foreach ($this->_frame->get_children() as $child) {
