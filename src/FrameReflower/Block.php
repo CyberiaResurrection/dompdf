@@ -734,20 +734,22 @@ class Block extends AbstractFrameReflower
             $float_y = $old_y;
             $float_w = $child->get_margin_width();
 
+            $float_x_offset = 0;
             if ($child_style->clear === "none") {
                 switch ($child_style->float) {
                     case "left":
-                        $float_x += $line_box->left;
+                        $float_x_offset = $line_box->left;
                         break;
                     case "right":
-                        $float_x += ($cb_w - $line_box->right - $float_w);
+                        $float_x_offset = ($cb_w - $line_box->right - $float_w);
                         break;
                 }
             } else {
                 if ($child_style->float === "right") {
-                    $float_x += ($cb_w - $float_w);
+                    $float_x_offset = ($cb_w - $float_w);
                 }
             }
+            $float_x += $float_x_offset;
 
             if ($cb_w < $float_x + $float_w - $old_x) {
                 $height = $child->get_content_box()['h'];
