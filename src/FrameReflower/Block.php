@@ -708,8 +708,10 @@ class Block extends AbstractFrameReflower
      * @param Frame $child
      * @param float $cb_x
      * @param float $cb_w
+     * @param int $cursor
+     * @throws Exception
      */
-    function process_float(Frame $child, $cb_x, $cb_w)
+    function process_float(Frame $child, $cb_x, $cb_w, $cursor = 0)
     {
         $child_style = $child->get_style();
         $root = $this->_frame->get_root();
@@ -727,7 +729,7 @@ class Block extends AbstractFrameReflower
             $line_box = $this->_frame->get_current_line_box();
             list($old_x, $old_y) = $child->get_position();
 
-            $float_x = $cb_x;
+            $float_x = $cb_x + $cursor;
             $float_y = $old_y;
             $float_w = $child->get_margin_width();
 
@@ -764,6 +766,7 @@ class Block extends AbstractFrameReflower
     /**
      * @param BlockFrameDecorator $block
      * @return mixed|void
+     * @throws Exception
      */
     function reflow(BlockFrameDecorator $block = null)
     {
@@ -855,7 +858,7 @@ class Block extends AbstractFrameReflower
 
             $kidWidth = floatval($child->get_content_box()['w']);
 
-            $this->process_float($child, $cb_x + $cursor, $w);
+            $this->process_float($child, $cb_x, $w, $cursor);
 
             $cursors[$vert] += $kidWidth;
         }
