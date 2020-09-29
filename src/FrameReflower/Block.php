@@ -752,6 +752,7 @@ class Block extends AbstractFrameReflower
             $float_x += $float_x_offset;
 
             if ($cb_w < $float_x + $float_w - $old_x) {
+                $cursor = 0;
                 $height = $child->get_content_box()['h'];
                 $float_y += $height;
                 $float_x = $cb_x;

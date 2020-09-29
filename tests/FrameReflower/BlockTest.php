@@ -58,7 +58,44 @@ class BlockTest extends TestCase
         $pdf->render();
 
         $output = $pdf->output();
-        file_put_contents('test.pdf', $output);
+        //file_put_contents('test.pdf', $output);
+
+        $tree = $pdf->getTree();
+
+        // node 2 - grandparent
+        $gp = $tree->get_frame(2);
+        $expectedWidth = 543.9685;
+        $actualWidth = $gp->get_containing_block('w');
+        $this->assertEquals($expectedWidth, $actualWidth, '', 0.0001);
+
+        // node 4 - parent of "ONE"
+        $oneParent = $tree->get_frame(4);
+        $expectedWidth = 225;
+        $actualWidth = $oneParent->get_containing_block('w');
+        $this->assertEquals($expectedWidth, $actualWidth, '', 0.0001);
+
+        // node 7 - parent of "two"
+        $twoParent = $tree->get_frame(7);
+        $expectedWidth = 225;
+        $actualWidth = $twoParent->get_containing_block('w');
+        $this->assertEquals($expectedWidth, $actualWidth, '', 0.0001);
+
+        // node 10 - parent of "three"
+        $threeParent = $tree->get_frame(10);
+        $expectedWidth = 225;
+        $actualWidth = $threeParent->get_containing_block('w');
+        $this->assertEquals($expectedWidth, $actualWidth, '', 0.0001);
+
+        // check that parent nodes line up correctly
+
+        // node 4 and node 7 should be on same line - different x, same y
+
+        $this->assertEquals($oneParent->get_position('y'), $twoParent->get_position('y'), 'One and Two parents should be on same line but are not');
+        $this->assertNotEquals($oneParent->get_position('x'), $twoParent->get_position('x'), 'One and Two parents should have different X positions but do not');
+
+        // node 4 and node 10 should be in same column - different y, same x
+        $this->assertNotEquals($oneParent->get_position('y'), $threeParent->get_position('y'), 'One and Three parents should not be on same line but are');
+        $this->assertEquals($oneParent->get_position('x'), $threeParent->get_position('x'), 'One and Three parents should not have different X positions but do');
     }
 
     /**
